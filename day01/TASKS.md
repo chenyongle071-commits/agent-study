@@ -39,18 +39,18 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 本地仓库：你电脑里的版本记录，也就是 .git 文件夹
 远程仓库：GitHub/Gitee 上的线上版本
 
-- [ ] 第 2 天：创建 Python 虚拟环境
-- [ ] 第 2 天：学习类型标注、异常处理、装饰器
-- [ ] 第 2 天：完成 3 个小练习：类型函数、异常捕获、日志装饰器
-- [ ] 第 2 天：提交 Git：day02-python-basics
+- [x] 第 2 天：创建 Python 虚拟环境
+- [x] 第 2 天：学习类型标注、异常处理、装饰器
+- [x] 第 2 天：完成 3 个小练习：类型函数、异常捕获、日志装饰器
+- [x] 第 2 天：提交 Git：day02-python-basics
 
 
 
-- [ ] 第 3 天：学习 async/await
-- [ ] 第 3 天：学习 Pydantic 数据模型
-- [ ] 第 3 天：学习环境变量和 HTTP 请求
-- [ ] 第 3 天：写一个调用 LLM API 的最小 Python 脚本
-- [ ] 第 3 天：提交 Git：day03-llm-client
+- [x] 第 3 天：学习 async/await
+- [x] 第 3 天：学习 Pydantic 数据模型
+- [x] 第 3 天：学习环境变量和 HTTP 请求
+- [x] 第 3 天：写一个调用 LLM API 的最小 Python 脚本
+- [x] 第 3 天：提交 Git：day03-llm-client
 
 - [ ] 第 4 天：创建 FastAPI 项目结构
 - [ ] 第 4 天：实现 health check 接口

@@ -1,0 +1,102 @@
+2. Pydantic 数据模型
+Pydantic 是一个第三方数据校验库，不是 Python 内置功能。
+它利用 Python 的类型标注来定义数据结构，并在创建模型对象或调用 model_validate() 时执行校验规则。
+我的理解：
+类型标注更像说明书，Pydantic 更像检查员。
+
+比如普通类型标注不会自动阻止错误输入，但 Pydantic 可以检查：
+字段是否存在
+类型是否正确
+字符串是否为空
+数字是否在范围内
+枚举值是否合法
+在 Agent 项目中，Pydantic 可以用于：
+FastAPI 请求体校验
+Function Calling 参数校验
+LLM JSON 输出校验
+工具返回结果校验
+
+3. 环境变量
+环境变量用于保存配置，例如：
+API Key
+Base URL
+Model Name
+这些内容不应该直接写死在代码里，尤其是 API Key，不能上传到 GitHub。
+本地真实配置放在：
+.env
+示例配置放在：
+.env.example
+.env 不上传 GitHub，.env.example 可以上传。
+示例：
+LLM_PROVIDER=deepseek
+LLM_API_KEY=your_api_key_here
+LLM_BASE_URL=https://api.deepseek.com
+LLM_MODEL=deepseek-v4-flash
+练习文件：
+exercises/env_demo.py
+
+4. HTTP 请求
+调用 LLM API 的本质是一次 HTTP 请求。
+一个 HTTP 请求通常包括：
+URL：请求发到哪里
+Method：请求方法，例如 GET、POST
+Headers：请求头，例如 Authorization
+Body：请求体，例如 JSON 数据
+Response：服务器返回的数据
+在本次练习中，我手动使用 httpx 向大模型接口发送 POST 请求。
+核心流程：
+读取 .env
+-> 拼接 URL
+-> 设置 headers
+-> 构造 JSON payload
+-> 发送 POST 请求
+-> 解析 response.json()
+-> 取出模型回答
+练习文件：
+exercises/http_demo.py
+
+5. SDK
+SDK 是 Software Development Kit，中文叫软件开发工具包。
+我的理解：
+SDK 是服务商提前封装好的工具代码，可以让开发者更方便地调用 API。
+
+不用 SDK 时，需要自己写：
+URL
+Headers
+JSON Payload
+HTTP POST
+Response 解析
+使用 SDK 后，可以通过更简单的方法调用模型。
+例如：
+client.chat.completions.create(...)
+SDK 背后本质上还是在发送 HTTP 请求，只是把很多细节封装好了。
+6. LLM Client
+本次练习完成了一个最小 LLM 调用脚本。
+它可以：
+从 .env 读取 API Key、Base URL 和模型名
+创建 OpenAI 兼容客户端
+调用 DeepSeek 或千问这类 OpenAI 兼容接口
+打印模型返回内容
+练习文件：
+exercises/llm_client.py
+7. 今日练习文件
+exercises/
+├── async_demo.py
+├── pydantic_demo.py
+├── env_demo.py
+├── http_demo.py
+└── llm_client.py
+8. 今日总结
+今天我理解了 LLM 应用开发的基础链路：
+配置管理
+-> 数据校验
+-> HTTP 请求
+-> SDK 调用
+-> 获取模型输出
+我也理解了：
+async/await 用于处理等待型任务
+Pydantic 用于定义和校验数据结构
+.env 用于保存本地敏感配置
+LLM API 本质上是 HTTP 请求
+SDK 是对 HTTP 请求的封装
+这一天的内容会直接用于后续 FastAPI 聊天接口、流式输出、Function Calling 和 Agent Workflow。
