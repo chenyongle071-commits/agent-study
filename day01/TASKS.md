@@ -52,11 +52,11 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 - [x] 第 3 天：写一个调用 LLM API 的最小 Python 脚本
 - [x] 第 3 天：提交 Git：day03-llm-client
 
-- [ ] 第 4 天：创建 FastAPI 项目结构
-- [ ] 第 4 天：实现 health check 接口
-- [ ] 第 4 天：实现基础 chat 接口
-- [ ] 第 4 天：学习路由、依赖注入、参数校验
-- [ ] 第 4 天：提交 Git：day04-fastapi-basic
+- [x] 第 4 天：创建 FastAPI 项目结构
+- [x] 第 4 天：实现 health check 接口
+- [x] 第 4 天：实现基础 chat 接口
+- [x] 第 4 天：学习路由、依赖注入、参数校验
+- [x] 第 4 天：提交 Git：day04-fastapi-basic
 
 - [ ] 第 5 天：学习 SQLModel/SQLAlchemy
 - [ ] 第 5 天：实现用户表、会话表、消息表
