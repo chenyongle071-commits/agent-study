@@ -5,6 +5,11 @@
 暂缓主线：论文产出、模型训练、SFT/RLHF、Go、Spring AI。
 了解即可：Go、Spring AI、Vibe Coding、MCP。
 
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+& .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+
 ## 第 1 周：Python 后端与 LLM 应用基础
 
 - [x] 第 1 天：调研 Agent 应用开发类实习 JD
