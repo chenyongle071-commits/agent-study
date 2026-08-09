@@ -63,10 +63,10 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 - [x] 第 5 天：实现创建会话和保存消息
 - [x] 第 5 天：提交 Git：day05-database
 
-- [ ] 第 6 天：学习 Message、Prompt、上下文管理
-- [ ] 第 6 天：实现历史消息拼接
-- [ ] 第 6 天：理解 Token、Temperature、System Prompt
-- [ ] 第 6 天：提交 Git：day06-prompt-context
+- [x] 第 6 天：学习 Message、Prompt、上下文管理
+- [x] 第 6 天：实现历史消息拼接
+- [x] 第 6 天：理解 Token、Temperature、System Prompt
+- [x] 第 6 天：提交 Git：day06-prompt-context
 
 - [ ] 第 7 天：实现 SSE 流式输出
 - [ ] 第 7 天：实现结构化 JSON 输出
