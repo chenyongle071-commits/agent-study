@@ -58,10 +58,10 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 - [x] 第 4 天：学习路由、依赖注入、参数校验
 - [x] 第 4 天：提交 Git：day04-fastapi-basic
 
-- [ ] 第 5 天：学习 SQLModel/SQLAlchemy
-- [ ] 第 5 天：实现用户表、会话表、消息表
-- [ ] 第 5 天：实现创建会话和保存消息
-- [ ] 第 5 天：提交 Git：day05-database
+- [x] 第 5 天：学习 SQLModel/SQLAlchemy
+- [x] 第 5 天：实现用户表、会话表、消息表
+- [x] 第 5 天：实现创建会话和保存消息
+- [x] 第 5 天：提交 Git：day05-database
 
 - [ ] 第 6 天：学习 Message、Prompt、上下文管理
 - [ ] 第 6 天：实现历史消息拼接
