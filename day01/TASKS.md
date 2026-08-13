@@ -14,6 +14,8 @@ cd D:\agent_study
 Copy-Item -Recurse day09 day10
 cd day10
 
+ python -m pip freeze > requirements.txt
+
 .\.venv\Scripts\Activate.ps1
 python -m uvicorn app.main:app --reload
 
@@ -126,9 +128,9 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 - [x] 第 17 天：学习 LangGraph State、Node、Edge
 - [x] 第 17 天：实现问题分类节点：RAG / 工具 / 普通问答
 
-- [ ] 第 18 天：实现 Agent 主工作流
-- [ ] 第 18 天：实现条件路由
-- [ ] 第 18 天：实现 Checkpoint 和状态持久化
+- [x] 第 18 天：实现 Agent 主工作流
+- [x] 第 18 天：实现条件路由
+- [x] 第 18 天：实现 Checkpoint 和状态持久化
 
 - [ ] 第 19 天：实现多轮会话 Memory
 - [ ] 第 19 天：实现工具失败重试
