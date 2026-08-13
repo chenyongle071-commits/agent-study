@@ -10,6 +10,13 @@ py -m venv .venv
 python -m pip install -r requirements.txt
 & .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 
+cd D:\agent_study
+Copy-Item -Recurse day09 day10
+cd day10
+
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn app.main:app --reload
+
 ## 第 1 周：Python 后端与 LLM 应用基础
 
 - [x] 第 1 天：调研 Agent 应用开发类实习 JD
@@ -88,9 +95,9 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 - [x] 第 9 天：接入一个向量数据库或本地向量索引
 - [x] 第 9 天：实现文档入库和向量化
 
-- [ ] 第 10 天：实现 Retriever
-- [ ] 第 10 天：实现 Top-K 召回
-- [ ] 第 10 天：实现基础 RAG 问答
+- [x] 第 10 天：实现 Retriever
+- [x] 第 10 天：实现 Top-K 召回
+- [x] 第 10 天：实现基础 RAG 问答
 
 - [ ] 第 11 天：实现关键词检索 + 向量检索
 - [ ] 第 11 天：了解 rerank 和查询改写

@@ -17,7 +17,7 @@ from app.prompting import build_llm_messages
 from app.structured import build_json_prompt, parse_structured_answer, StructuredAnswer
 from app.resilience import build_rate_limit_key, call_with_retry, rate_limiter
 from app.vector_store import index_chunks, search_chunks
-
+from app.retriever import build_context_from_chunks, retrieve_chunks
 from app.config import Settings, get_settings
 from app.database import create_db_and_tables, get_session
 from app.dependencies import LLMClient
@@ -36,6 +36,9 @@ from app.schemas import (
     RagSearchResult,
     UserCreate,
     UserRead,
+    RagAnswerRequest,
+    RagAnswerResponse,
+    RagSource,
 )
 
 
@@ -291,6 +294,144 @@ async def list_document_chunks(
         for chunk in chunks
         if chunk.id is not None
     ]
+
+@app.post("/documents/{document_id}/index", response_model=DocumentIndexResponse)
+async def index_document(
+    document_id: int,
+    session: DbSession,
+) -> DocumentIndexResponse:
+    document = session.get(Document, document_id)
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="文档不存在。",
+        )
+
+    chunks = session.exec(
+        select(Chunk)
+        .where(Chunk.document_id == document_id)
+        .order_by(Chunk.chunk_index)
+    ).all()
+
+    chunk_payloads = [
+        {
+            "id": chunk.id,
+            "text": chunk.text,
+            "metadata": {
+                **chunk.meta,
+                "chunk_db_id": chunk.id,
+                "document_id": chunk.document_id,
+                "user_id": chunk.user_id,
+            },
+        }
+        for chunk in chunks
+        if chunk.id is not None
+    ]
+
+    indexed_count = index_chunks(chunk_payloads)
+
+    return DocumentIndexResponse(
+        document_id=document_id,
+        indexed_chunk_count=indexed_count,
+    )
+
+
+@app.post("/rag/search", response_model=RagSearchResponse)
+async def rag_search(
+    request: RagSearchRequest,
+) -> RagSearchResponse:
+    raw_results = search_chunks(
+        query=request.query,
+        user_id=request.user_id,
+        top_k=request.top_k,
+    )
+
+    return RagSearchResponse(
+        results=[
+            RagSearchResult(
+                chunk_id=result["id"],
+                text=result["text"],
+                metadata=result["metadata"],
+                distance=result["distance"],
+            )
+            for result in raw_results
+        ]
+    )
+
+@app.post("/rag/answer", response_model=RagAnswerResponse)
+async def rag_answer(
+    request: RagAnswerRequest,
+    client: LLMClient,
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> RagAnswerResponse:
+    chunks = retrieve_chunks(
+        query=request.query,
+        user_id=request.user_id,
+        top_k=request.top_k,
+    )
+
+    if not chunks:
+        raise HTTPException(
+            status_code=404,
+            detail="没有检索到相关文档内容，无法生成有依据的回答。",
+        )
+
+    context = build_context_from_chunks(chunks)
+
+    try:
+        response = client.chat.completions.create(
+            model=settings.llm_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "你是一个严谨的 RAG 问答助手。"
+                        "你只能根据用户提供的资料回答问题。"
+                        "如果资料中没有答案，就回答：根据当前资料无法回答。"
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"用户问题：{request.query}\n\n"
+                        f"可参考资料：\n{context}\n\n"
+                        "请根据可参考资料回答用户问题，回答要简洁。"
+                    ),
+                },
+            ],
+            temperature=request.temperature,
+        )
+    except Exception as error:
+        raise HTTPException(
+            status_code=502,
+            detail="LLM 服务调用失败，请检查 API 配置或稍后重试。",
+        ) from error
+
+    answer = response.choices[0].message.content
+
+    if not answer:
+        raise HTTPException(
+            status_code=502,
+            detail="LLM 返回了空内容。",
+        )
+
+    sources = []
+    for chunk in chunks:
+        metadata = chunk["metadata"]
+        sources.append(
+            RagSource(
+                chunk_id=chunk["id"],
+                filename=metadata.get("filename", "unknown"),
+                text=chunk["text"],
+                distance=chunk["distance"],
+            )
+        )
+
+    return RagAnswerResponse(
+        answer=answer,
+        sources=sources,
+    )
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(

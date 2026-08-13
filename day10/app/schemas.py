@@ -100,6 +100,13 @@ class ChunkRead(BaseModel):
     created_at: datetime
 
 
+class DocumentUploadResponse(BaseModel):
+    """文档上传后的返回数据。"""
+
+    document: DocumentRead
+    chunk_count: int
+    chunks: list[ChunkRead]
+
 class DocumentIndexResponse(BaseModel):
     """文档向量化后的返回数据。"""
 
@@ -137,3 +144,21 @@ class RagSearchResponse(BaseModel):
     """RAG 检索响应。"""
 
     results: list[RagSearchResult]
+
+class RagAnswerRequest(BaseModel):
+    user_id: int
+    query: str = Field(min_length=1, max_length=1000, description="用户查询问题")
+    top_k: int = Field(default=3, ge=1, le=10, description="用于生成答案的相关 chunk 数量")
+    temperature: float = Field(default=0.3, ge=0, le=2, description="回答随机性")
+
+
+class RagSource(BaseModel):
+    chunk_id: str
+    filename: str
+    text: str
+    distance: float
+
+
+class RagAnswerResponse(BaseModel):
+    answer: str
+    sources: list[RagSource]
