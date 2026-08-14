@@ -19,6 +19,12 @@ cd day10
 .\.venv\Scripts\Activate.ps1
 python -m uvicorn app.main:app --reload
 
+复制项目
+robocopy .\day21 .\day22 /E /XD .venv __pycache__ chroma_db /XF app.db *.pyc .env
+启动项目
+cd D:\agent_study\day21
+D:\agent_study\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+
 ## 第 1 周：Python 后端与 LLM 应用基础
 
 - [x] 第 1 天：调研 Agent 应用开发类实习 JD
@@ -140,14 +146,17 @@ Git 是版本管理工具。它可以在本地记录项目每一次重要修改�
 - [x] 第 20 天：实现高风险操作人工确认
 - [x] 第 20 天：实现幂等性设计说明
 
-- [ ] 第 21 天：了解 MCP 工具暴露和调用概念
-- [ ] 第 21 天：可选实现最小 MCP 工具服务
-- [ ] 第 21 天：完成周验收：Agent 稳定选择并调用至少 3 个真实工具
+- [x] 第 21 天：了解 MCP 工具暴露和调用概念
+- [x] 第 21 天：可选实现最小 MCP 工具服务
+- [x] 第 21 天：完成周验收：Agent 稳定选择并调用至少 3 个真实工具
 
 ## 第 4 周：前端、评测、安全、部署与求职
-
-- [ ] 第 22 天：完成 Vue 对话页面
-- [ ] 第 22 天：展示流式输出、历史消息、加载和错误状态
+下载
+npm install
+启动
+npm run dev
+- [x] 第 22 天：完成 Vue 对话页面
+- [x] 第 22 天：展示流式输出、历史消息、加载和错误状态
 
 - [ ] 第 23 天：完成实验管理页面
 - [ ] 第 23 天：完成指标对比图表
