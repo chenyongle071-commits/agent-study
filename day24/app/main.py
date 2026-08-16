@@ -936,6 +936,46 @@ def extract_metrics(question: str) -> list[str]:
 
     return metrics
 
+def build_tool_response(
+    selected_tool: str,
+    selected_params: dict[str, object],
+    tool_call,
+) -> dict[str, object]:
+    try:
+        raw_result = tool_call()
+        if hasattr(raw_result, "model_dump"):
+            raw_result = raw_result.model_dump()
+    except HTTPException as error:
+        raw_result = {
+            "success": False,
+            "status_code": error.status_code,
+            "detail": error.detail,
+        }
+
+    return {
+        "selected_tool": selected_tool,
+        "selected_params": selected_params,
+        "raw_result": raw_result,
+    }
+
+
+def extract_document_query(question: str) -> str:
+    patterns = [
+        "在实验文档里搜索",
+        "搜索实验文档里关于",
+        "帮我从文档中找一下",
+        "从文档中找一下",
+        "文档中找一下",
+    ]
+
+    query = question
+
+    for pattern in patterns:
+        query = query.replace(pattern, "")
+
+    query = query.replace("的内容", "")
+    return query.strip()
+
 
 def execute_real_tool_from_question(
     user_id: int,
@@ -945,68 +985,86 @@ def execute_real_tool_from_question(
     experiment_ids = extract_experiment_ids(question)
     metrics = extract_metrics(question)
 
-    if "失败案例" in question:
-        result = query_failure_cases_tool(
-            QueryFailureCasesInput(
-                user_id=user_id,
-                category="all",
-                only_failed=True,
-                limit=5,
-            )
+    if "失败案例" in question or "失败样本" in question:
+        selected_params = {
+            "user_id": user_id,
+            "category": "all",
+            "only_failed": True,
+            "limit": 5,
+        }
+
+        return build_tool_response(
+            selected_tool="query_failure_cases_tool",
+            selected_params=selected_params,
+            tool_call=lambda: query_failure_cases_tool(
+                QueryFailureCasesInput(**selected_params)
+            ),
         )
 
-        return {
-            "selected_tool": "query_failure_cases_tool",
-            "tool_result": result.model_dump(),
+    if "文档" in question or "RAG" in question or "embedding" in question or "Top-K" in question:
+        selected_params = {
+            "user_id": user_id,
+            "query": extract_document_query(question),
+            "top_k": 3,
         }
+
+        return build_tool_response(
+            selected_tool="search_experiment_documents_tool",
+            selected_params=selected_params,
+            tool_call=lambda: search_experiment_documents_tool(
+                SearchExperimentDocumentsInput(**selected_params),
+                session,
+            ),
+        )
 
     if len(experiment_ids) >= 2 and len(metrics) >= 2:
-        result = calculate_metric_changes_tool(
-            CalculateMetricChangesInput(
-                user_id=user_id,
-                experiment_a_id=experiment_ids[0],
-                experiment_b_id=experiment_ids[1],
-                metrics=metrics,
-            ),
-            session,
-        )
-
-        return {
-            "selected_tool": "calculate_metric_changes_tool",
-            "tool_result": result.model_dump(),
+        selected_params = {
+            "user_id": user_id,
+            "experiment_a_id": experiment_ids[0],
+            "experiment_b_id": experiment_ids[1],
+            "metrics": metrics,
         }
+
+        return build_tool_response(
+            selected_tool="calculate_metric_changes_tool",
+            selected_params=selected_params,
+            tool_call=lambda: calculate_metric_changes_tool(
+                CalculateMetricChangesInput(**selected_params),
+                session,
+            ),
+        )
 
     if len(experiment_ids) >= 2:
-        metric_name = metrics[0] if metrics else "f1"
-
-        result = compare_metric_tool(
-            CompareMetricInput(
-                user_id=user_id,
-                experiment_a_id=experiment_ids[0],
-                experiment_b_id=experiment_ids[1],
-                metric_name=metric_name,
-            ),
-            session,
-        )
-
-        return {
-            "selected_tool": "compare_metric_tool",
-            "tool_result": result.model_dump(),
+        selected_params = {
+            "user_id": user_id,
+            "experiment_a_id": experiment_ids[0],
+            "experiment_b_id": experiment_ids[1],
+            "metric_name": metrics[0] if metrics else "f1",
         }
+
+        return build_tool_response(
+            selected_tool="compare_metric_tool",
+            selected_params=selected_params,
+            tool_call=lambda: compare_metric_tool(
+                CompareMetricInput(**selected_params),
+                session,
+            ),
+        )
 
     if len(experiment_ids) == 1:
-        result = get_experiment_tool(
-            GetExperimentInput(
-                user_id=user_id,
-                experiment_id=experiment_ids[0],
-            ),
-            session,
-        )
-
-        return {
-            "selected_tool": "get_experiment_tool",
-            "tool_result": result.model_dump(),
+        selected_params = {
+            "user_id": user_id,
+            "experiment_id": experiment_ids[0],
         }
+
+        return build_tool_response(
+            selected_tool="get_experiment_tool",
+            selected_params=selected_params,
+            tool_call=lambda: get_experiment_tool(
+                GetExperimentInput(**selected_params),
+                session,
+            ),
+        )
 
     raise HTTPException(
         status_code=400,
@@ -1111,7 +1169,7 @@ async def agent_run(
     answer = result.get("answer")
     tool_result = result.get("tool_result")
 
-    if result["route"] == "tool":
+    try:
         real_tool_call = execute_real_tool_from_question(
             user_id=request.user_id,
             question=request.question,
@@ -1120,6 +1178,9 @@ async def agent_run(
 
         tool_result = real_tool_call
         answer = f"已选择并调用真实工具：{real_tool_call['selected_tool']}"
+        result["route"] = "tool"
+    except HTTPException:
+        pass
 
     return AgentRunResponse(
         user_id=result["user_id"],
