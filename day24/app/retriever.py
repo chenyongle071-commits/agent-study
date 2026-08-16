@@ -81,7 +81,7 @@ def hybrid_retrieve_chunks(
     user_id: int,
     session: Session,
     top_k: int = 3,
-    max_vector_distance: float = 1.0,
+    max_vector_distance: float = 2.0,
 ) -> list[dict[str, Any]]:
     """
     混合检索：同时使用关键词检索和向量检索，然后合并去重。
